@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en" data-theme="%%THEME%%" data-motion="%%MOTION%%">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{deck.title}}</title>
+%%FONTS%%
+  <link rel="stylesheet" href="engine/deck.css">
+  <link rel="stylesheet" href="engine/themes.css">
+  <style>
+    /* This deck's own styles. Use the theme's variables (var(--accent), var(--ink-2)...).
+       To brand the deck, override them here:
+       html[data-theme] { --accent: #0a7cff; --font-head: "Inter Tight", sans-serif; } */
+%%BRAND%%
+  </style>
+</head>
+<body>
+  <!-- The data list. Every {{path}} on the slides is filled from here, so names, numbers and
+       dates are typed once. Press E while presenting to try other values. -->
+  <script type="application/json" id="deck-data">
+%%DATA%%
+  </script>
+
+  <main class="deck" data-transition="fade" data-footer="{{deck.title}}">
+
+    <section class="slide layout-title" id="title">
+      <p class="kicker" data-anim="fade">{{deck.kicker}}</p>
+      <h1 data-anim="rise" data-delay="120">{{deck.title}}</h1>
+      <p class="lead" data-anim="rise" data-delay="260">{{deck.subtitle}}</p>
+      <p class="byline" data-anim="fade" data-delay="420"><span>{{presenter.name}}</span><span>{{deck.date | date}}</span></p>
+      <aside class="notes">Welcome and one sentence on why this matters to this audience.</aside>
+    </section>
+
+  </main>
+
+  <script src="engine/icons.js"></script>
+  <script src="engine/deck.js"></script>
+  <script>
+    // This deck's own code. Start library widgets with deck.mount(selector, (el, ctx) => {...});
+    // they start the first time their slide is shown. See references/libraries.md.
+  </script>
+</body>
+</html>

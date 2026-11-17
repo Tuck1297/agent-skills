@@ -1,0 +1,265 @@
+{
+  "_about": "Libraries a deck may pull in instead of hand-building a UI element. All are no-build browser files, pinned to exact versions on jsDelivr; bundle.mjs inlines them so a bundled deck works offline. Add with scripts/add-lib.mjs. Usage notes: references/libraries.md.",
+  "cdn": "https://cdn.jsdelivr.net/npm/",
+  "libs": [
+    {
+      "id": "alpine",
+      "name": "Alpine.js",
+      "pkg": "alpinejs",
+      "version": "3.17.5",
+      "license": "MIT",
+      "global": "Alpine",
+      "scripts": [
+        "dist/cdn.min.js"
+      ],
+      "after": true,
+      "use": "Make a mockup actually work: forms that validate, lists you can add to and filter, toggles, totals that update, tabs with real content (x-data, x-model, x-for, x-show)."
+    },
+    {
+      "id": "sortable",
+      "name": "SortableJS",
+      "pkg": "sortablejs",
+      "version": "1.15.7",
+      "license": "MIT",
+      "global": "Sortable",
+      "scripts": [
+        "Sortable.min.js"
+      ],
+      "use": "Drag to reorder: kanban boards, sortable lists, moving cards between columns, touch-friendly."
+    },
+    {
+      "id": "chartjs",
+      "name": "Chart.js",
+      "pkg": "chart.js",
+      "version": "4.6.1",
+      "license": "MIT",
+      "global": "Chart",
+      "scripts": [
+        "dist/chart.umd.min.js"
+      ],
+      "use": "Charts inside app screens that respond to hover and taps (tooltips, legends you can click), or chart types data-chart lacks: radar, scatter, bubble, mixed bar and line."
+    },
+    {
+      "id": "echarts",
+      "name": "Apache ECharts",
+      "pkg": "echarts",
+      "version": "6.1.0",
+      "license": "Apache-2.0",
+      "global": "echarts",
+      "scripts": [
+        "dist/echarts.min.js"
+      ],
+      "large": true,
+      "use": "Dense dashboards and specialist charts: gauges, sankey, treemap, heatmap, funnel, calendar heatmap, candlestick, graph networks."
+    },
+    {
+      "id": "d3",
+      "name": "D3",
+      "pkg": "d3",
+      "version": "7.9.0",
+      "license": "ISC",
+      "global": "d3",
+      "scripts": [
+        "dist/d3.min.js"
+      ],
+      "use": "A one-off custom visualization no chart library draws (force layouts, custom maps, animated explainers)."
+    },
+    {
+      "id": "flatpickr",
+      "name": "flatpickr",
+      "pkg": "flatpickr",
+      "version": "4.6.13",
+      "license": "MIT",
+      "global": "flatpickr",
+      "scripts": [
+        "dist/flatpickr.min.js"
+      ],
+      "styles": [
+        "dist/flatpickr.min.css"
+      ],
+      "use": "A working date or date-range picker, or an inline calendar (bookings, scheduling, trip planning)."
+    },
+    {
+      "id": "tomselect",
+      "name": "Tom Select",
+      "pkg": "tom-select",
+      "version": "2.6.2",
+      "license": "Apache-2.0",
+      "global": "TomSelect",
+      "scripts": [
+        "dist/js/tom-select.complete.min.js"
+      ],
+      "styles": [
+        "dist/css/tom-select.css"
+      ],
+      "use": "Searchable dropdowns, tag and multi-select inputs, autocomplete."
+    },
+    {
+      "id": "gridjs",
+      "name": "Grid.js",
+      "pkg": "gridjs",
+      "version": "6.2.0",
+      "license": "MIT",
+      "global": "gridjs",
+      "scripts": [
+        "dist/gridjs.umd.js"
+      ],
+      "styles": [
+        "dist/theme/mermaid.min.css"
+      ],
+      "use": "A data table that really searches, sorts and pages (admin screens, reports, CRM lists)."
+    },
+    {
+      "id": "swiper",
+      "name": "Swiper",
+      "pkg": "swiper",
+      "version": "14.4.0",
+      "license": "MIT",
+      "global": "Swiper",
+      "scripts": [
+        "swiper-bundle.min.js"
+      ],
+      "styles": [
+        "swiper-bundle.min.css"
+      ],
+      "use": "Swipeable carousels: onboarding screens, image galleries, card stacks, with dots and momentum."
+    },
+    {
+      "id": "leaflet",
+      "name": "Leaflet",
+      "pkg": "leaflet",
+      "version": "1.9.4",
+      "license": "BSD-2-Clause",
+      "global": "L",
+      "scripts": [
+        "dist/leaflet.js"
+      ],
+      "styles": [
+        "dist/leaflet.css"
+      ],
+      "online": "Map tiles load from the internet; offline the map is blank behind its markers.",
+      "use": "A real pan-and-zoom map with pins, routes and areas (store finders, delivery, travel, field teams)."
+    },
+    {
+      "id": "mermaid",
+      "name": "Mermaid",
+      "pkg": "mermaid",
+      "version": "12.2.0",
+      "license": "MIT",
+      "global": "mermaid",
+      "scripts": [
+        "dist/mermaid.min.js"
+      ],
+      "large": true,
+      "use": "Diagrams written as text: flowcharts, sequence, state, ER, class, user journey, gantt, mind maps, architecture.",
+      "gotcha": "Don't give a diagram class=\"mermaid\": Mermaid renders those itself at page load while their slide is hidden and they come out tiny. Use class=\"diagram\" and mermaid.render() inside deck.mount, with startOnLoad: false and solid colors (ctx.solid)."
+    },
+    {
+      "id": "highlight",
+      "name": "highlight.js",
+      "pkg": "@highlightjs/cdn-assets",
+      "version": "11.12.0",
+      "license": "BSD-3-Clause",
+      "global": "hljs",
+      "scripts": [
+        "highlight.min.js"
+      ],
+      "styles": [
+        "styles/github-dark.min.css"
+      ],
+      "use": "Syntax highlighting for real code in code slides and in IDE or terminal mockups (190 languages)."
+    },
+    {
+      "id": "katex",
+      "name": "KaTeX",
+      "pkg": "katex",
+      "version": "0.19.1",
+      "license": "MIT",
+      "global": "katex",
+      "scripts": [
+        "dist/katex.min.js"
+      ],
+      "styles": [
+        "dist/katex.min.css"
+      ],
+      "large": true,
+      "use": "Typeset math: formulas, equations, proofs (lectures, research, finance models)."
+    },
+    {
+      "id": "xterm",
+      "name": "xterm.js",
+      "pkg": "@xterm/xterm",
+      "version": "6.0.0",
+      "license": "MIT",
+      "global": "Terminal",
+      "scripts": [
+        "lib/xterm.js"
+      ],
+      "styles": [
+        "css/xterm.css"
+      ],
+      "use": "A real terminal for CLI and developer-tool demos: colored output, typed commands, progress bars."
+    },
+    {
+      "id": "lottie",
+      "name": "Lottie",
+      "pkg": "lottie-web",
+      "version": "5.13.0",
+      "license": "MIT",
+      "global": "lottie",
+      "scripts": [
+        "build/player/lottie.min.js"
+      ],
+      "use": "Play a Lottie animation (.json from After Effects or LottieFiles) the user supplies: illustrations, animated icons, success states."
+    },
+    {
+      "id": "gsap",
+      "name": "GSAP",
+      "pkg": "gsap",
+      "version": "3.15.0",
+      "license": "GSAP standard license (free, including commercial use)",
+      "global": "gsap",
+      "scripts": [
+        "dist/gsap.min.js",
+        "dist/Flip.min.js",
+        "dist/SplitText.min.js"
+      ],
+      "use": "Choreographed motion beyond data-anim: timelines, Flip layout morphs inside a mockup, physics-like easing, scrubbed sequences."
+    },
+    {
+      "id": "confetti",
+      "name": "canvas-confetti",
+      "pkg": "canvas-confetti",
+      "version": "1.9.4",
+      "license": "ISC",
+      "global": "confetti",
+      "scripts": [
+        "dist/confetti.browser.min.js"
+      ],
+      "use": "A confetti burst for a launch, a milestone or a success screen in a demo."
+    },
+    {
+      "id": "qrcode",
+      "name": "qrcode-generator",
+      "pkg": "qrcode-generator",
+      "version": "2.0.4",
+      "license": "MIT",
+      "global": "qrcode",
+      "scripts": [
+        "dist/qrcode.js"
+      ],
+      "use": "A scannable QR code (try the app, download the deck, join the waitlist), drawn crisp at any size."
+    },
+    {
+      "id": "pico",
+      "name": "Pico CSS (scoped)",
+      "pkg": "@picocss/pico",
+      "version": "2.1.1",
+      "license": "MIT",
+      "styles": [
+        "css/pico.conditional.min.css"
+      ],
+      "use": "Good-looking native form controls, tables, switches, sliders, accordions and dialogs inside a web-app mockup, by adding class=\"pico\" to the mockup's screen. Styles nothing outside .pico."
+    }
+  ]
+}

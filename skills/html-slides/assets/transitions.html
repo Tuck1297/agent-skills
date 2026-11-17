@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" data-theme="keynote" data-motion="moderate">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Slide transitions</title>
+  <link rel="stylesheet" href="engine/deck.css">
+  <link rel="stylesheet" href="engine/themes.css">
+  <style>
+    .tx { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: var(--gap); width: 100%; }
+    .tx h2 { font-size: 150px; letter-spacing: -0.04em; line-height: 0.95; }
+    .tx .lead { max-width: 1100px; }
+    .tx .group { font-family: var(--font-mono); font-size: 26px; color: var(--ink-3); text-align: right; }
+    .dot { width: 220px; height: 220px; border-radius: 50%; background: var(--accent); }
+    .slide.tone-2 { background: var(--bg-2); }
+  </style>
+</head>
+<body>
+  <main class="deck" data-transition="fade" data-enter="cascade">
+
+    <section class="slide layout-title" id="intro">
+      <p class="kicker">html-slides</p>
+      <h1>Slide transitions</h1>
+      <p class="lead">Press → to see each one. T changes the theme, so you can see each theme's sweep colors. M changes the motion level.</p>
+      <aside class="notes">Every slide here is entered with the transition it names.</aside>
+    </section>
+
+    <section class="slide" data-transition="fade"><div class="tx"><div><p class="kicker">Basic</p><h2>fade</h2><p class="lead">A cross-fade. Calm, and right for any deck.</p></div><p class="group">data-transition="fade"</p></div></section>
+    <section class="slide tone-2" data-transition="slide"><div class="tx"><div><p class="kicker">Basic</p><h2>slide</h2><p class="lead">The old slide pushes off and the new one pushes on. A good default for content.</p></div><p class="group">data-transition="slide"</p></div></section>
+    <section class="slide" data-transition="rise"><div class="tx"><div><p class="kicker">Basic</p><h2>rise</h2><p class="lead">The new slide floats up into place.</p></div><p class="group">data-transition="rise"</p></div></section>
+    <section class="slide tone-2" data-transition="zoom"><div class="tx"><div><p class="kicker">Basic</p><h2>zoom</h2><p class="lead">Zooms through to the next slide.</p></div><p class="group">data-transition="zoom"</p></div></section>
+    <section class="slide" data-transition="wipe"><div class="tx"><div><p class="kicker">Basic</p><h2>wipe</h2><p class="lead">A straight edge wipes across.</p></div><div class="dot" data-morph="dot"></div></div></section>
+    <section class="slide tone-2" data-transition="morph"><div class="tx" style="grid-template-columns: auto 1fr"><div class="dot" data-morph="dot" style="width: 420px; height: 420px; background: var(--accent-2)"></div><div><p class="kicker">Basic</p><h2>morph</h2><p class="lead">Elements with the same data-morph name glide from one slide to the next, like PowerPoint's Morph.</p></div></div></section>
+
+    <section class="slide" data-transition="iris"><div class="tx"><div><p class="kicker">Reveal</p><h2>iris</h2><p class="lead">A circle opens from where you clicked (or the side the slide comes from).</p></div><p class="group">data-transition="iris"</p></div></section>
+    <section class="slide tone-2" data-transition="diagonal"><div class="tx"><div><p class="kicker">Reveal</p><h2>diagonal</h2><p class="lead">A slanted edge cuts across.</p></div><p class="group">data-transition="diagonal"</p></div></section>
+    <section class="slide" data-transition="split"><div class="tx"><div><p class="kicker">Reveal</p><h2>split</h2><p class="lead">Opens from the middle like doors.</p></div><p class="group">data-transition="split"</p></div></section>
+    <section class="slide tone-2" data-transition="blinds"><div class="tx"><div><p class="kicker">Reveal</p><h2>blinds</h2><p class="lead">Venetian blinds open across the slide.</p></div><p class="group">data-transition="blinds"</p></div></section>
+    <section class="slide" data-transition="cube"><div class="tx"><div><p class="kicker">Reveal</p><h2>cube</h2><p class="lead">The deck turns like a cube.</p></div><p class="group">data-transition="cube"</p></div></section>
+
+    <section class="slide tone-2" data-transition="panels"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>panels</h2><p class="lead">Three panels of color sweep across, one over another.</p></div><p class="group">data-transition="panels"</p></div></section>
+    <section class="slide" data-transition="stripes"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>stripes</h2><p class="lead">Diagonal bands of color race across.</p></div><p class="group">data-transition="stripes"</p></div></section>
+    <section class="slide tone-2" data-transition="shutter"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>shutter</h2><p class="lead">Columns drop like a shutter, then fall away.</p></div><p class="group">data-transition="shutter"</p></div></section>
+    <section class="slide" data-transition="circle"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>circle</h2><p class="lead">Rings of color grow from the click, then open onto the slide.</p></div><p class="group">data-transition="circle"</p></div></section>
+    <section class="slide tone-2" data-transition="tiles"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>tiles</h2><p class="lead">Tiles pop in from one corner and out again.</p></div><p class="group">data-transition="tiles"</p></div></section>
+    <section class="slide" data-transition="wave"><div class="tx"><div><p class="kicker">Motion graphics</p><h2>wave</h2><p class="lead">A liquid wave of color rises through.</p></div><p class="group">data-transition="wave"</p></div></section>
+
+    <section class="slide layout-closing" data-transition="auto">
+      <p class="kicker">data-transition="auto"</p>
+      <h2>Each theme has its own</h2>
+      <p class="lead">With auto, title, section and closing slides get the theme's signature sweep, statements and quotes get its reveal, and other slides get a quieter move. data-enter="cascade" brings each slide's content in piece by piece.</p>
+    </section>
+
+  </main>
+
+  <script src="engine/icons.js"></script>
+  <script src="engine/deck.js"></script>
+</body>
+</html>

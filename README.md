@@ -30,7 +30,9 @@ Claude Code's subagents and slash commands become skills for Gemini and Codex, w
 ## What's here
 
 <!-- skills:start -->
-Nothing yet.
+| Name | Kind | What it does |
+| --- | --- | --- |
+| [html-slides](skills/html-slides) | Skill | Makes presentation decks from a prompt as ONE self-contained interactive HTML file (its own slide engine with click builds, motion-graphic transitions, presenter view, live data and clickable app demos) and/or a PowerPoint (.pptx) that plays the same slides, steps and transitions. |
 <!-- skills:end -->
 
 ## How one source becomes each agent's version

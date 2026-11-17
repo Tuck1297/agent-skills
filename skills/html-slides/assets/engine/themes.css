@@ -1,0 +1,652 @@
+/*
+ * html-slides themes. <html data-theme="..."> picks one. Each theme sets the same variables
+ * (see :root in deck.css) plus a few signature touches. To brand a deck, override variables
+ * in the deck's own <style> with html[data-theme] { --accent: ...; }.
+ */
+
+/* ---------- Corporate: clean, navy and blue, structured; reports, business reviews ---------- */
+[data-theme="corporate"] {
+  --bg: #ffffff;
+  --bg-2: #f3f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef2f8;
+  --ink: #0e1a2b;
+  --ink-2: #4a5568;
+  --ink-3: #8592a6;
+  --line: #dde3ec;
+  --accent: #1f4fd8;
+  --accent-2: #0e9f8f;
+  --accent-ink: #ffffff;
+  --inv-bg: #0f2242;
+  --inv-ink: #ffffff;
+  --inv-ink-2: #b8c4d9;
+  --inv-surface: #182e55;
+  --inv-line: rgba(255, 255, 255, 0.14);
+  --inv-accent: #7aa7ff;
+  --chart-1: #1f4fd8;
+  --chart-2: #0e9f8f;
+  --chart-3: #f2a93b;
+  --chart-4: #7c5cdb;
+  --chart-5: #e5484d;
+  --chart-6: #8592a6;
+  --font-head: "Plus Jakarta Sans", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  --head-weight: 800;
+  --head-tracking: -0.025em;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --icon-radius: 14px;
+  --bullet-radius: 3px;
+  --shadow:
+    0 1px 2px rgba(14, 26, 43, 0.06), 0 10px 30px rgba(14, 26, 43, 0.08);
+}
+[data-theme="corporate"] .slide-chrome {
+  display: flex;
+  --chrome-text: visible;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+[data-theme="corporate"] .layout-title::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 30%;
+  z-index: -1;
+  background:
+    radial-gradient(
+        circle at 1px 1px,
+        rgba(255, 255, 255, 0.22) 1.5px,
+        transparent 0
+      )
+      0 0 / 28px 28px,
+    linear-gradient(160deg, #1f4fd8, #0f2242 70%);
+}
+[data-theme="corporate"] .layout-title > :not(.notes, .slide-chrome) {
+  max-width: 1150px;
+}
+
+/* ---------- Minimal: Swiss grid, one red accent, hairlines; strategy, design, product ---------- */
+[data-theme="minimal"] {
+  --bg: #f6f5f1;
+  --bg-2: #ecebe5;
+  --surface: #ffffff;
+  --surface-2: #ecebe5;
+  --ink: #111111;
+  --ink-2: #55554f;
+  --ink-3: #8c8c85;
+  --line: #d6d4cc;
+  --accent: #e8361c;
+  --accent-2: #111111;
+  --accent-ink: #ffffff;
+  --inv-bg: #111111;
+  --inv-ink: #f6f5f1;
+  --inv-ink-2: #a3a39b;
+  --inv-surface: #1d1d1d;
+  --inv-line: rgba(255, 255, 255, 0.16);
+  --inv-accent: #ff5a3c;
+  --chart-1: #111111;
+  --chart-2: #e8361c;
+  --chart-3: #8c8c85;
+  --chart-4: #c9c7bf;
+  --chart-5: #4a4a46;
+  --chart-6: #ff9b85;
+  --font-head: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --head-weight: 800;
+  --head-tracking: -0.045em;
+  --head-leading: 0.98;
+  --radius: 0px;
+  --radius-lg: 0px;
+  --icon-radius: 0px;
+  --bullet-radius: 0;
+  --shadow: none;
+  --card-border: 0;
+  --stat-ink: var(--ink);
+}
+[data-theme="minimal"] .slide:not(.layout-media)::before {
+  content: "";
+  position: absolute;
+  left: var(--pad-x);
+  right: var(--pad-x);
+  top: 58px;
+  height: 2px;
+  background: var(--ink);
+}
+[data-theme="minimal"] .slide-chrome {
+  display: flex;
+  --chrome-text: visible;
+  top: 24px;
+  bottom: auto;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+[data-theme="minimal"] .card {
+  padding: 28px 0 0;
+  border-top: 2px solid var(--ink);
+  background: none;
+}
+[data-theme="minimal"] .bullets:not(.numbered, .check) > li::before {
+  width: 24px;
+  height: 3px;
+}
+[data-theme="minimal"] .kicker {
+  color: var(--ink);
+}
+[data-theme="minimal"] .stat:first-child .stat-value,
+[data-theme="minimal"] .stat.is-key .stat-value {
+  color: var(--accent);
+}
+
+/* ---------- Bold keynote: dark, big type, glowing gradients; launches, vision, tech talks ---------- */
+[data-theme="keynote"] {
+  color-scheme: dark;
+  --bg: #07070b;
+  --bg-2: #101018;
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-2: rgba(255, 255, 255, 0.08);
+  --ink: #f4f4f8;
+  --ink-2: #a5a5b8;
+  --ink-3: #6e6e84;
+  --line: rgba(255, 255, 255, 0.12);
+  --accent: #8b7cff;
+  --accent-2: #2ee6d6;
+  --accent-ink: #0b0b12;
+  --inv-bg: #f4f4f8;
+  --inv-ink: #0b0b12;
+  --inv-ink-2: #4b4b5c;
+  --inv-surface: #ffffff;
+  --inv-line: rgba(0, 0, 0, 0.1);
+  --inv-accent: #5b4cff;
+  --chart-1: #8b7cff;
+  --chart-2: #2ee6d6;
+  --chart-3: #ff7ab6;
+  --chart-4: #ffd166;
+  --chart-5: #5aa9ff;
+  --chart-6: #a5a5b8;
+  --font-head: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --head-weight: 700;
+  --head-tracking: -0.04em;
+  --head-leading: 1.02;
+  --fs-hero: 140px;
+  --radius: 18px;
+  --radius-lg: 28px;
+  --shadow: 0 30px 60px rgba(0, 0, 0, 0.45);
+  --card-border: 1px solid rgba(255, 255, 255, 0.1);
+  --screen-bg: #ffffff;
+}
+[data-theme="keynote"] .slide:not(.layout-media, .invert, .on-accent)::before {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      38% 46% at 82% 18%,
+      color-mix(in srgb, var(--accent) 34%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      32% 42% at 12% 92%,
+      color-mix(in srgb, var(--accent-2) 20%, transparent),
+      transparent 70%
+    );
+}
+html[data-motion="heavy"][data-theme="keynote"] .slide.is-active::before {
+  animation: deck-drift 22s ease-in-out infinite alternate;
+}
+[data-theme="keynote"] .slide mark {
+  background: linear-gradient(100deg, var(--accent) 10%, var(--accent-2) 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+[data-theme="keynote"] .card {
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+[data-theme="keynote"] .stat-value {
+  color: var(--ink);
+}
+
+/* ---------- Startup pitch: warm, punchy, big numbers and color blocks; pitches, sales ---------- */
+[data-theme="pitch"] {
+  --bg: #fffaf3;
+  --bg-2: #fff1de;
+  --surface: #ffffff;
+  --surface-2: #fff1de;
+  --ink: #17130f;
+  --ink-2: #5b5249;
+  --ink-3: #9a8f84;
+  --line: #eadfd1;
+  --accent: #ff4d2e;
+  --accent-2: #3a3dff;
+  --accent-ink: #ffffff;
+  --inv-bg: #17130f;
+  --inv-ink: #fffaf3;
+  --inv-ink-2: #c9bfb3;
+  --inv-surface: #262019;
+  --inv-line: rgba(255, 255, 255, 0.14);
+  --inv-accent: #ff6a4d;
+  --chart-1: #ff4d2e;
+  --chart-2: #3a3dff;
+  --chart-3: #ffb800;
+  --chart-4: #00b37e;
+  --chart-5: #17130f;
+  --chart-6: #c9bfb3;
+  --font-head: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "DM Sans", "Segoe UI", system-ui, sans-serif;
+  --head-weight: 800;
+  --head-tracking: -0.04em;
+  --head-leading: 0.98;
+  --radius: 18px;
+  --radius-lg: 30px;
+  --icon-radius: 22px;
+  --shadow: 0 2px 0 rgba(23, 19, 15, 0.05), 0 18px 40px rgba(23, 19, 15, 0.08);
+  --card-border: 0;
+  --stat-ink: var(--ink);
+}
+[data-theme="pitch"] .slide mark {
+  padding: 0 0.12em;
+  border-radius: 0.14em;
+  background: var(--accent);
+  color: var(--accent-ink);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+[data-theme="pitch"] .layout-title::before {
+  content: "";
+  position: absolute;
+  right: -170px;
+  bottom: -260px;
+  width: 780px;
+  height: 780px;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--accent);
+}
+[data-theme="pitch"] .layout-title::after {
+  content: "";
+  position: absolute;
+  right: 430px;
+  top: 110px;
+  width: 150px;
+  height: 150px;
+  z-index: -1;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+[data-theme="pitch"] .layout-title > :not(.notes, .slide-chrome) {
+  max-width: 1200px;
+}
+[data-theme="pitch"] .stat.is-key .stat-value,
+[data-theme="pitch"] .stat:first-child .stat-value {
+  color: var(--accent);
+}
+
+/* ---------- Editorial: magazine serif on warm paper; stories, research, brand narratives ---------- */
+[data-theme="editorial"] {
+  --bg: #f3eee4;
+  --bg-2: #e9e2d4;
+  --surface: #fbf8f2;
+  --surface-2: #e9e2d4;
+  --ink: #1d1a16;
+  --ink-2: #5a5249;
+  --ink-3: #8f8679;
+  --line: #d3c9b8;
+  --accent: #b23a1e;
+  --accent-2: #2f5d50;
+  --accent-ink: #fbf8f2;
+  --inv-bg: #1d1a16;
+  --inv-ink: #f3eee4;
+  --inv-ink-2: #bdb3a3;
+  --inv-surface: #2a2621;
+  --inv-line: rgba(255, 255, 255, 0.14);
+  --inv-accent: #e0714f;
+  --chart-1: #b23a1e;
+  --chart-2: #2f5d50;
+  --chart-3: #c99a3b;
+  --chart-4: #1d1a16;
+  --chart-5: #7a8b99;
+  --chart-6: #bdb3a3;
+  --font-head: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Newsreader", Georgia, "Times New Roman", serif;
+  --font-kicker: "Newsreader", Georgia, serif;
+  --head-weight: 600;
+  --head-tracking: -0.02em;
+  --head-leading: 1.02;
+  --quote-weight: 400;
+  --fs-body: 34px;
+  --radius: 2px;
+  --radius-lg: 4px;
+  --icon-radius: 50%;
+  --shadow: none;
+  --card-border: 0;
+}
+[data-theme="editorial"] .slide:not(.layout-media)::before {
+  content: "";
+  position: absolute;
+  left: var(--pad-x);
+  right: var(--pad-x);
+  top: 46px;
+  height: 7px;
+  border-top: 2px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+}
+[data-theme="editorial"] .slide-chrome {
+  display: flex;
+  --chrome-text: visible;
+  top: 62px;
+  bottom: auto;
+  font-size: 17px;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--ink-2);
+}
+[data-theme="editorial"] .kicker {
+  font-size: 30px;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+[data-theme="editorial"] .slide mark {
+  font-style: italic;
+}
+[data-theme="editorial"] .card {
+  padding: 26px 0 0;
+  border-top: 1px solid var(--ink);
+  background: none;
+}
+[data-theme="editorial"] .dropcap::first-letter {
+  float: left;
+  padding: 0.06em 0.1em 0 0;
+  font-family: var(--font-head);
+  font-size: 3.3em;
+  line-height: 0.82;
+  color: var(--accent);
+}
+[data-theme="editorial"] .stat-value {
+  font-weight: 500;
+}
+
+/* ---------- Academic: readable, numbered, quiet; lectures, training, research talks ---------- */
+[data-theme="academic"] {
+  --bg: #fbfaf6;
+  --bg-2: #f1efe7;
+  --surface: #ffffff;
+  --surface-2: #f1efe7;
+  --ink: #1c2430;
+  --ink-2: #4d5866;
+  --ink-3: #8a93a0;
+  --line: #dcd9cf;
+  --accent: #123f7a;
+  --accent-2: #9e1b32;
+  --accent-ink: #ffffff;
+  --inv-bg: #123f7a;
+  --inv-ink: #ffffff;
+  --inv-ink-2: #c7d3e6;
+  --inv-surface: #1b4d8f;
+  --inv-line: rgba(255, 255, 255, 0.18);
+  --inv-accent: #ffd27a;
+  --chart-1: #123f7a;
+  --chart-2: #9e1b32;
+  --chart-3: #d08c2c;
+  --chart-4: #2e7d5b;
+  --chart-5: #6b7a8f;
+  --chart-6: #b8c2cf;
+  --font-head: "Libre Franklin", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Literata", Georgia, "Times New Roman", serif;
+  --head-weight: 700;
+  --head-tracking: -0.015em;
+  --head-leading: 1.08;
+  --fs-body: 30px;
+  --radius: 6px;
+  --radius-lg: 10px;
+  --icon-radius: 10px;
+  --bullet-radius: 2px;
+  --shadow: 0 1px 3px rgba(28, 36, 48, 0.08);
+}
+[data-theme="academic"] .slide-chrome {
+  display: flex;
+  --chrome-text: visible;
+}
+[data-theme="academic"] .slide-head h2 {
+  padding-bottom: 22px;
+  border-bottom: 2px solid var(--line);
+}
+[data-theme="academic"] .kicker {
+  color: var(--accent-2);
+}
+[data-theme="academic"] .slide mark {
+  padding: 0 0.1em;
+  background: color-mix(in srgb, #ffd27a 60%, transparent);
+  color: inherit;
+}
+
+/* ---------- Playful: sunny, rounded, sticker shadows; workshops, kids, community, fun ---------- */
+[data-theme="playful"] {
+  --bg: #fff4d9;
+  --bg-2: #ffe8b0;
+  --surface: #ffffff;
+  --surface-2: #fff0c7;
+  --ink: #2a1f14;
+  --ink-2: #6b5843;
+  --ink-3: #a08c74;
+  --line: #2a1f14;
+  --accent: #ff5b5b;
+  --accent-2: #4361ee;
+  --accent-ink: #ffffff;
+  --inv-bg: #2a1f14;
+  --inv-ink: #fff4d9;
+  --inv-ink-2: #d9c7a8;
+  --inv-surface: #3a2c1d;
+  --inv-line: #fff4d9;
+  --inv-accent: #ffd23f;
+  --chart-1: #ff5b5b;
+  --chart-2: #4361ee;
+  --chart-3: #ffb703;
+  --chart-4: #2ec4b6;
+  --chart-5: #9b5de5;
+  --chart-6: #2a1f14;
+  --font-head: "Fredoka", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Nunito", "Segoe UI", system-ui, sans-serif;
+  --head-weight: 600;
+  --head-tracking: -0.01em;
+  --head-leading: 1.02;
+  --radius: 22px;
+  --radius-lg: 34px;
+  --icon-radius: 50%;
+  --shadow: 6px 6px 0 var(--ink);
+  --card-border: 3px solid var(--ink);
+}
+[data-theme="playful"] .card:nth-child(odd) {
+  rotate: -1deg;
+}
+[data-theme="playful"] .card:nth-child(even) {
+  rotate: 0.8deg;
+}
+[data-theme="playful"] .slide mark {
+  background: linear-gradient(transparent 56%, #ffd23f 56%);
+  color: inherit;
+}
+[data-theme="playful"] .slide:not(.layout-media, .invert, .on-accent)::before {
+  content: "";
+  position: absolute;
+  right: -150px;
+  top: -170px;
+  width: 540px;
+  height: 540px;
+  z-index: -1;
+  border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+  background: var(--accent-2);
+  opacity: 0.14;
+}
+[data-theme="playful"] .slide:not(.layout-media, .invert, .on-accent)::after {
+  content: "";
+  position: absolute;
+  left: -120px;
+  bottom: -150px;
+  width: 400px;
+  height: 400px;
+  z-index: -1;
+  border-radius: 58% 42% 38% 62% / 52% 61% 39% 48%;
+  background: #ffd23f;
+  opacity: 0.5;
+}
+html[data-motion="heavy"][data-theme="playful"] .slide.is-active::before,
+html[data-motion="heavy"][data-theme="playful"] .slide.is-active::after {
+  animation: deck-drift 14s ease-in-out infinite alternate;
+}
+[data-theme="playful"] .bullets:not(.numbered, .check) > li::before {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--ink);
+}
+/* Numbered bullets get the sticker outline too. */
+[data-theme="playful"] .bullets.numbered > li::before {
+  border: 3px solid var(--ink);
+  line-height: 38px;
+}
+[data-theme="playful"] .icon {
+  border: 3px solid var(--ink);
+}
+
+/* ---------- Elegant: dark green and gold, refined serif; luxury, events, culture ---------- */
+[data-theme="elegant"] {
+  color-scheme: dark;
+  --bg: #0f1412;
+  --bg-2: #161d1a;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-2: rgba(255, 255, 255, 0.06);
+  --ink: #f2ece0;
+  --ink-2: #b9b2a4;
+  --ink-3: #7f7a70;
+  --line: rgba(201, 164, 92, 0.35);
+  --accent: #c9a45c;
+  --accent-2: #8fae9a;
+  --accent-ink: #0f1412;
+  --inv-bg: #f2ece0;
+  --inv-ink: #0f1412;
+  --inv-ink-2: #5c574e;
+  --inv-surface: #ffffff;
+  --inv-line: rgba(15, 20, 18, 0.15);
+  --inv-accent: #9a7a3a;
+  --chart-1: #c9a45c;
+  --chart-2: #8fae9a;
+  --chart-3: #e8dcc2;
+  --chart-4: #6f8f7f;
+  --chart-5: #a07f4a;
+  --chart-6: #5c6b64;
+  --font-head: "Cormorant Garamond", Garamond, Georgia, serif;
+  --font-body: "Jost", "Segoe UI", system-ui, sans-serif;
+  --head-weight: 500;
+  --head-tracking: -0.01em;
+  --head-leading: 1;
+  --fs-hero: 150px;
+  --fs-h1: 108px;
+  --fs-h2: 80px;
+  --fs-h3: 46px;
+  --fs-body: 30px;
+  --fs-stat: 150px;
+  --radius: 0px;
+  --radius-lg: 0px;
+  --icon-radius: 50%;
+  --bullet-radius: 0;
+  --shadow: none;
+  --card-border: 1px solid var(--line);
+}
+[data-theme="elegant"] .slide:not(.layout-media)::before {
+  content: "";
+  position: absolute;
+  inset: 36px;
+  z-index: -1;
+  border: 1px solid var(--line);
+  pointer-events: none;
+}
+[data-theme="elegant"] .kicker {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.34em;
+}
+[data-theme="elegant"] .slide mark {
+  font-style: italic;
+}
+[data-theme="elegant"] .stat-value {
+  font-weight: 400;
+}
+[data-theme="elegant"] .bullets:not(.numbered, .check) > li::before {
+  width: 11px;
+  height: 11px;
+  rotate: 45deg;
+}
+[data-theme="elegant"]
+  :is(
+    .layout-title,
+    .layout-section,
+    .layout-statement,
+    .layout-closing,
+    .layout-quote
+  ) {
+  align-items: center;
+  text-align: center;
+}
+[data-theme="elegant"]
+  :is(.layout-title, .layout-section, .layout-statement, .layout-closing)
+  .byline,
+[data-theme="elegant"] .layout-closing .contact {
+  justify-content: center;
+}
+
+/* Each theme's motion-graphic transitions (data-transition="auto" picks from these) */
+[data-theme="corporate"] {
+  --mg-signature: stripes;
+  --mg-reveal: wipe;
+  --mg-content: slide;
+}
+[data-theme="minimal"] {
+  --mg-signature: panels;
+  --mg-reveal: split;
+  --mg-content: fade;
+  --mg-1: var(--ink);
+  --mg-2: var(--accent);
+  --mg-3: var(--bg-2);
+}
+[data-theme="keynote"] {
+  --mg-signature: panels;
+  --mg-reveal: iris;
+  --mg-content: slide;
+  --mg-3: #f4f4f8;
+}
+[data-theme="pitch"] {
+  --mg-signature: circle;
+  --mg-reveal: diagonal;
+  --mg-content: slide;
+}
+[data-theme="editorial"] {
+  --mg-signature: shutter;
+  --mg-reveal: blinds;
+  --mg-content: fade;
+  --mg-2: var(--ink);
+}
+[data-theme="academic"] {
+  --mg-signature: wipe;
+  --mg-reveal: split;
+  --mg-content: fade;
+}
+[data-theme="playful"] {
+  --mg-signature: tiles;
+  --mg-reveal: iris;
+  --mg-content: rise;
+}
+[data-theme="elegant"] {
+  --mg-signature: wave;
+  --mg-reveal: split;
+  --mg-content: fade;
+}
