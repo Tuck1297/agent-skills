@@ -1,0 +1,89 @@
+{
+  "_about": "How tools/install.mjs installs the one source of each skill, agent and command for each agent (tools/lib/render.mjs has the rules). Paths starting with ~/ are under the home folder.",
+  "agents": {
+    "claude": {
+      "label": "Claude Code",
+      "skills": [
+        "~/.claude/skills"
+      ],
+      "agents": "~/.claude/agents",
+      "commands": "~/.claude/commands",
+      "shared": {
+        "guides": "~/.claude/guides",
+        "scripts": "~/.claude/scripts",
+        "templates": "~/.claude/templates"
+      }
+    },
+    "gemini": {
+      "label": "Gemini CLI and Antigravity",
+      "_skills": "~/.gemini/skills is Gemini CLI's (the Antigravity CLI reads it too); ~/.gemini/config/skills is Antigravity's app, IDE and CLI (https://antigravity.google/docs/skills.md). Skills of the same name in the retire folders, which older installs used, are moved to ~/.gemini/.skills-backup.",
+      "skills": [
+        "~/.gemini/skills",
+        "~/.gemini/config/skills"
+      ],
+      "retire": [
+        "~/.gemini/antigravity/skills",
+        "~/.gemini/antigravity-cli/skills"
+      ],
+      "shared": {
+        "guides": "~/.gemini/antigravity/guides"
+      },
+      "paths": {
+        "~/.claude/": "~/.gemini/",
+        ".claude/": ".agents/"
+      },
+      "names": {
+        "Claude Code": "Gemini",
+        "Claude": "Gemini",
+        "CLAUDE.md": "GEMINI.md"
+      },
+      "models": {
+        "opus": "gemini-3.5-pro",
+        "sonnet": "gemini-3.5-flash",
+        "haiku": "gemini-3.5-flash"
+      },
+      "claudeOnly": [
+        "AskUserQuestion",
+        "TodoWrite",
+        "Task tool",
+        "Agent tool",
+        "Artifact tool",
+        "subagent_type"
+      ]
+    },
+    "codex": {
+      "label": "Codex",
+      "skills": [
+        "~/.codex/skills"
+      ],
+      "shared": {
+        "guides": "~/.codex/guides"
+      },
+      "paths": {
+        "~/.claude/": "~/.codex/",
+        ".claude/": ".codex/"
+      },
+      "names": {
+        "Claude Code": "Codex",
+        "Claude": "Codex",
+        "CLAUDE.md": "AGENTS.md"
+      },
+      "models": {
+        "opus": "gpt-5.5",
+        "sonnet": "gpt-5.4-mini",
+        "haiku": "gpt-5.4-mini"
+      },
+      "commandModel": "gpt-5.4-mini",
+      "claudeOnly": [
+        "AskUserQuestion",
+        "TodoWrite",
+        "Task tool",
+        "Agent tool",
+        "Artifact tool",
+        "subagent_type"
+      ]
+    }
+  },
+  "_items": "Per item: only (the agents it gets installed for), requires (other items it needs, for publishing), private (never published), others (frontmatter keys for every agent but Claude) and, per agent, frontmatter keys for that agent.",
+  "items": {}
+}
