@@ -85,5 +85,24 @@
     }
   },
   "_items": "Per item: only (the agents it gets installed for), draft (unfinished: installed only when named), private (never published), requires (other items it needs, for publishing), others (frontmatter keys for every agent but Claude) and, per agent, frontmatter keys for that agent.",
-  "items": {}
+  "items": {
+    "frontend-design": {
+      "gemini": {
+        "globs": [
+          "**/*.html",
+          "**/*.css",
+          "**/*.scss",
+          "**/*.jsx",
+          "**/*.tsx",
+          "**/*.vue",
+          "**/*.svelte"
+        ]
+      }
+    },
+    "refactor-frontend": {
+      "others": {
+        "description": "Use when frontend code needs refactoring to improve maintainability, reduce duplication, or align with existing React and TypeScript patterns."
+      }
+    }
+  }
 }

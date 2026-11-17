@@ -15,7 +15,7 @@ cd agent-skills
 ./install.sh --list             # what's here and which agents get it
 ```
 
-Update later with `git pull` and `./install.sh --replace`. Without `--replace`, installed files you've edited are left alone. `--dry-run` shows what would change.
+Update later with `git pull` and `./install.sh --replace`. Files you've edited where they're installed are kept, even with `--replace` (`--force` overwrites them), and each run lists them. `--dry-run` shows what would change.
 
 Where it installs:
 
@@ -32,7 +32,14 @@ Claude Code's subagents and slash commands become skills for Gemini and Codex, w
 <!-- skills:start -->
 | Name | Kind | What it does |
 | --- | --- | --- |
+| [changelog-commit](commands/changelog-commit.md) | Command | Update changelog from staged changes and draft a commit message for review |
+| [design-review](agents/design-review.md) | Subagent | Comprehensive design review specialist using Playwright for live testing. |
+| [frontend-design](skills/frontend-design) | Skill | Create distinctive, production-grade frontend interfaces with high design quality. |
+| [frontend-developer](agents/frontend-developer.md) | Subagent | Expert UI engineer focused on crafting robust, scalable frontend solutions. |
 | [html-slides](skills/html-slides) | Skill | Makes presentation decks from a prompt as ONE self-contained interactive HTML file (its own slide engine with click builds, motion-graphic transitions, presenter view, live data and clickable app demos) and/or a PowerPoint (.pptx) that plays the same slides, steps and transitions. |
+| [lint-typecheck](skills/lint-typecheck) | Skill | Run ESLint and TypeScript compilation checks on frontend code. |
+| [refactor-frontend](agents/refactor-frontend.md) | Subagent | Use when frontend code needs refactoring to improve maintainability, reduce duplication, or align with existing React and TypeScript patterns. |
+| [typescript-pro](agents/typescript-pro.md) | Subagent | Expert TypeScript developer specializing in advanced type system usage, full-stack development, and build optimization. |
 <!-- skills:end -->
 
 ## How one source becomes each agent's version

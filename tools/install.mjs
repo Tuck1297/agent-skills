@@ -8,10 +8,14 @@
 //   node tools/install.mjs html-slides          only these skills, agents or commands
 //                                               (and the guides, scripts and templates they use)
 //   --replace     update files that differ from the repo's, and remove ones the repo dropped;
-//                 an installed file that's newer than its source in the repo is kept
-//   --force       with --replace, overwrite those newer installed files too
-//   --pull        copy installed Claude Code files that are newer than the repo's back into
-//                 the repo (edits made in ~/.claude), so they aren't lost; review with git diff
+//                 a file edited where it's installed is kept (see below)
+//   --force       with --replace, overwrite those edited files too
+//   --pull        copy Claude Code files edited in ~/.claude back into the repo, so they
+//                 aren't lost; review with git diff
+//
+// An installed file counts as edited when it matches neither what this installer wrote there
+// last time (recorded in ~/.<agent>/.installed-from-<repo>.json) nor, for Claude Code, any
+// version in the repo's git history. File dates aren't used: a git checkout changes them.
 //   --dry-run     say what would change, change nothing
 //   --home <dir>  install under another home folder (to try it out)
 //   --list        list what's here and which agents get it
@@ -19,6 +23,8 @@
 // Files are copied, not linked: run it again after editing a skill. Without --replace, a file
 // that's already installed and differs is left alone, so local edits survive. Items marked
 // draft in tools/agents.json are only installed when named.
+import { execFileSync } from "node:child_process";
+import crypto from "node:crypto";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -95,35 +101,74 @@ if (opts.list) {
 }
 
 // ---------------------------------------------------------------- writing
-const counts = { new: 0, updated: 0, same: 0, skipped: 0, newer: 0, removed: 0 };
+const counts = { new: 0, updated: 0, same: 0, skipped: 0, edited: 0, removed: 0 };
 const skippedItems = [];
-const newerInstalled = []; // { agent, dest, src }: installed copies edited after the repo's source
+const editedInstalled = []; // { agent, dest, src }: installed copies edited where they're installed
 let currentAgent = "";
+let lastIds = new Map(); // installed file -> content id this installer wrote there last time
+let ids = new Map(); // the same, for this run (saved in the manifest)
+
+// A file's content id: its git blob id, with LF line endings for text (how git stores it).
+const isText = (b) => !b.subarray(0, 8000).includes(0);
+const lf = (b) => (isText(b) ? Buffer.from(b.toString("utf8").replace(/\r\n/g, "\n")) : b);
+const blobId = (b) => crypto.createHash("sha1").update(`blob ${b.length}\0`).update(b).digest("hex");
+const contentId = (b) => blobId(lf(b));
+
+// Every object id in this repo's git history (empty when it isn't a git checkout).
+let history;
+function repoVersions() {
+  if (!history) {
+    history = new Set();
+    try {
+      const out = execFileSync("git", ["-C", ROOT, "rev-list", "--all", "--objects"], { encoding: "utf8", maxBuffer: 512 << 20, stdio: ["ignore", "pipe", "ignore"] });
+      for (const line of out.split("\n")) if (line) history.add(line.split(" ")[0]);
+    } catch {
+      // not a git checkout: only the manifest tells what was installed
+    }
+  }
+  return history;
+}
+
+// True when an installed file holds something this repo put there: what this installer wrote
+// last time, or (Claude Code's copies are the sources' own format) any version the repo has had.
+// Gemini's and Codex's copies are made from the sources, so with no record they count as ours.
+function isOurs(file) {
+  const old = fs.readFileSync(file);
+  const id = contentId(old);
+  const last = lastIds.get(path.resolve(file));
+  if (id === last) return true;
+  if (currentAgent === "claude") return repoVersions().has(id) || repoVersions().has(blobId(old));
+  return !last;
+}
 
 // Writes one file; returns what happened.
 function put(dest, data, src) {
+  const next = Buffer.isBuffer(data) ? data : Buffer.from(data);
+  const abs = path.resolve(dest);
+  const done = (result) => {
+    if (result === "edited" || result === "skipped") {
+      if (lastIds.has(abs)) ids.set(abs, lastIds.get(abs));
+    } else ids.set(abs, contentId(next));
+    return result;
+  };
   const exists = fs.existsSync(dest);
   if (exists) {
     const old = fs.readFileSync(dest);
-    const next = Buffer.isBuffer(data) ? data : Buffer.from(data);
-    if (Buffer.compare(old, next) === 0) return "same";
     // Text that differs only in line endings (CRLF from a Windows checkout) is the same text.
-    const text = (b) => (b.subarray(0, 8000).includes(0) ? null : b.toString("utf8").replace(/\r\n/g, "\n"));
-    if (text(old) !== null && text(old) === text(next)) return "same";
-    // Installed after the source last changed and different: edited where it's installed. Only
-    // Claude Code's copies are the source's own format; the others are made from it.
-    const newer = currentAgent === "claude" && src && fs.statSync(dest).mtimeMs > fs.statSync(src).mtimeMs + 2000;
-    if (newer) newerInstalled.push({ agent: currentAgent, dest, src });
-    if (newer && !opts.force) return "newer";
-    if (!opts.replace) return "skipped";
+    if (Buffer.compare(old, next) === 0 || (isText(old) && lf(old).equals(lf(next)))) return done("same");
+    if (!isOurs(dest)) {
+      editedInstalled.push({ agent: currentAgent, dest, src });
+      if (!opts.force) return done("edited");
+    }
+    if (!opts.replace) return done("skipped");
   }
   if (!opts.dryRun) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     if (exists && fs.lstatSync(dest).isSymbolicLink()) fs.rmSync(dest);
-    fs.writeFileSync(dest, data);
+    fs.writeFileSync(dest, next);
     if (src && process.platform !== "win32") fs.chmodSync(dest, fs.statSync(src).mode & 0o777);
   }
-  return exists ? "updated" : "new";
+  return done(exists ? "updated" : "new");
 }
 
 function remove(file) {
@@ -134,7 +179,7 @@ function remove(file) {
 // One line per item or folder: what happened to its files.
 function report(label, results, removed = 0) {
   const n = (k) => results.filter((r) => r === k).length;
-  for (const k of ["new", "updated", "same", "skipped", "newer"]) counts[k] += n(k);
+  for (const k of ["new", "updated", "same", "skipped", "edited"]) counts[k] += n(k);
   const parts = [];
   if (n("new") === results.length && results.length) parts.push(green("new"));
   else {
@@ -142,7 +187,7 @@ function report(label, results, removed = 0) {
     if (n("updated")) parts.push(green(`${n("updated")} updated`));
     if (removed) parts.push(green(`${removed} removed`));
     if (n("skipped")) parts.push(yellow(`${n("skipped")} differ, kept (--replace updates them)`));
-    if (n("newer")) parts.push(yellow(`${n("newer")} edited since installing, kept`));
+    if (n("edited")) parts.push(yellow(`${n("edited")} edited where installed, kept`));
     if (!parts.length) parts.push(dim("up to date"));
   }
   if (n("skipped")) skippedItems.push(label);
@@ -153,9 +198,10 @@ function report(label, results, removed = 0) {
 const manifestPath = (agent) => path.join(expandHome(cfg.agents[agent].skills[0], opts.home), "..", `.installed-from-${REPO}.json`);
 function readManifest(agent) {
   try {
-    return JSON.parse(fs.readFileSync(manifestPath(agent), "utf8")).files || [];
+    const m = JSON.parse(fs.readFileSync(manifestPath(agent), "utf8"));
+    return { files: m.files || [], ids: m.ids || {} };
   } catch {
-    return [];
+    return { files: [], ids: {} };
   }
 }
 
@@ -175,8 +221,11 @@ function installAgent(agent) {
   if (drafts.length) console.log(dim(`  drafts, not installed unless named: ${drafts.map((i) => i.name).join(", ")}`));
   const written = [];
   // What this repo installed here last time; only those files are ever removed.
-  const before = readManifest(agent).map((f) => path.resolve(opts.home, f));
+  const manifest = readManifest(agent);
+  const before = manifest.files.map((f) => path.resolve(opts.home, f));
   const installedBefore = new Set(before);
+  lastIds = new Map(Object.entries(manifest.ids).map(([f, id]) => [path.resolve(opts.home, f), id]));
+  ids = new Map();
 
   // Older installs kept skills in other folders; move those out so nothing loads twice.
   for (const old of a.retire || []) {
@@ -211,7 +260,7 @@ function installAgent(agent) {
       if (opts.replace && (i.kind === "skill" || agent !== "claude") && fs.existsSync(folder)) {
         const keep = new Set(files.map((f) => f.rel.slice(i.name.length + 1)));
         for (const rel of walk(folder))
-          if (!keep.has(rel) && !rel.split("/").some((p) => SKIP.has(p)) && installedBefore.has(path.resolve(folder, rel))) {
+          if (!keep.has(rel) && !rel.split("/").some((p) => SKIP.has(p)) && installedBefore.has(path.resolve(folder, rel)) && isOurs(path.join(folder, rel))) {
             remove(path.join(folder, rel));
             removed++;
           }
@@ -262,7 +311,10 @@ function installAgent(agent) {
   // the repo no longer has. A partial install only adds to the record.
   const now = new Set(written.map((f) => path.resolve(f)));
   if (opts.replace && !opts.names.length) {
-    const gone = before.filter((f) => !now.has(f) && fs.existsSync(f));
+    const dropped = before.filter((f) => !now.has(f) && fs.existsSync(f));
+    const gone = dropped.filter((f) => isOurs(f));
+    for (const f of dropped.filter((f) => !gone.includes(f)))
+      console.log(`  ${yellow("kept")} ${path.relative(opts.home, f).split(path.sep).join("/")} ${dim("(no longer in the repo, but edited where installed)")}`);
     for (const f of gone) {
       remove(f);
       console.log(`  ${green("removed")} ${path.relative(opts.home, f).split(path.sep).join("/")} ${dim("(no longer in the repo)")}`);
@@ -273,8 +325,14 @@ function installAgent(agent) {
   const record = opts.names.length ? new Set([...before, ...now]) : now;
   if (!opts.dryRun) {
     fs.mkdirSync(path.dirname(manifestPath(agent)), { recursive: true });
-    const files = [...record].map((f) => path.relative(opts.home, f).split(path.sep).join("/")).sort();
-    fs.writeFileSync(manifestPath(agent), JSON.stringify({ repo: REPO, source: ROOT, installed: new Date().toISOString(), files }, null, 2) + "\n");
+    const rel = (f) => path.relative(opts.home, f).split(path.sep).join("/");
+    const files = [...record].sort();
+    const recordIds = {};
+    for (const f of files) {
+      const id = ids.get(f) ?? lastIds.get(f);
+      if (id) recordIds[rel(f)] = id;
+    }
+    fs.writeFileSync(manifestPath(agent), JSON.stringify({ repo: REPO, source: ROOT, installed: new Date().toISOString(), files: files.map(rel), ids: recordIds }, null, 2) + "\n");
   }
 }
 
@@ -297,21 +355,19 @@ if (skippedItems.length) console.log(yellow(`${skippedItems.length} installed ${
 if (claudeOnlyNotes.length)
   console.log(dim(`\nThese mention Claude Code tools the other agents don't have (fine if the text explains it, otherwise add an agent block):\n  ${claudeOnlyNotes.join("\n  ")}`));
 
-// Installed copies edited after their source here: keep them from being lost.
+// Installed copies edited where they're installed: keep them from being lost.
 const short = (f) => path.relative(opts.home, f).split(path.sep).join("/");
 const day = (f) => fs.statSync(f).mtime.toISOString().slice(0, 10);
 const hasMarkers = (f) => /\.md$/i.test(f) && /<!-- (\/?agent\b|\/?as-is -->)/.test(fs.readFileSync(f, "utf8"));
-const claudeEdits = newerInstalled.sort((x, y) => fs.statSync(y.dest).mtimeMs - fs.statSync(x.dest).mtimeMs);
-if (claudeEdits.length) {
-  console.log(yellow(`\n${claudeEdits.length} installed Claude Code file${claudeEdits.length === 1 ? " was" : "s were"} edited after the repo's copy (installed date, then the repo's):`));
-  for (const x of claudeEdits) console.log(`  ${short(x.dest).padEnd(58)} ${day(x.dest)}  ${dim(day(x.src))}${hasMarkers(x.src) ? red("  has agent blocks: merge by hand") : ""}`);
+const edits = editedInstalled.sort((x, y) => fs.statSync(y.dest).mtimeMs - fs.statSync(x.dest).mtimeMs);
+if (edits.length) {
+  console.log(yellow(`\n${edits.length} installed file${edits.length === 1 ? " was" : "s were"} edited where ${edits.length === 1 ? "it's" : "they're"} installed (last changed):`));
+  for (const x of edits)
+    console.log(`  ${short(x.dest).padEnd(58)} ${day(x.dest)}${x.agent !== "claude" ? dim("  made from the repo: edit the source instead") : x.src && hasMarkers(x.src) ? red("  source has agent blocks: merge by hand") : ""}`);
+  const pullable = edits.filter((x) => x.agent === "claude" && x.src && !hasMarkers(x.src));
   if (opts.pull) {
-    let n = 0;
-    for (const x of claudeEdits) {
-      if (hasMarkers(x.src)) continue;
-      if (pullWrites) fs.copyFileSync(x.dest, x.src);
-      n++;
-    }
-    console.log(pullWrites ? green(`Copied ${n} back into the repo. Review them with git diff, then install again.`) : `--pull would copy ${n} back into the repo.`);
-  } else console.log(`${opts.force ? "--force overwrote them." : "They were kept."} To keep the edits, copy them into the repo first: node tools/install.mjs --pull (then review with git diff).`);
+    if (pullWrites) for (const x of pullable) fs.copyFileSync(x.dest, x.src);
+    console.log(pullWrites ? green(`Copied ${pullable.length} back into the repo. Review them with git diff, then install again.`) : `--pull would copy ${pullable.length} back into the repo.`);
+  } else
+    console.log(`${opts.force ? "--force overwrote them." : "They were kept."}${pullable.length ? ` To keep the Claude Code edits, copy them into the repo first: node tools/install.mjs --pull (then review with git diff).` : ""}`);
 }
