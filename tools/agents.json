@@ -84,6 +84,6 @@
       ]
     }
   },
-  "_items": "Per item: only (the agents it gets installed for), requires (other items it needs, for publishing), private (never published), others (frontmatter keys for every agent but Claude) and, per agent, frontmatter keys for that agent.",
+  "_items": "Per item: only (the agents it gets installed for), draft (unfinished: installed only when named), private (never published), requires (other items it needs, for publishing), others (frontmatter keys for every agent but Claude) and, per agent, frontmatter keys for that agent.",
   "items": {}
 }
