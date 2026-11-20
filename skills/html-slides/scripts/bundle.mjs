@@ -2,12 +2,19 @@
 // Bundles a deck into ONE self-contained .html file: the engine, icons, libraries
 // (add-lib.mjs), the theme's Google Fonts and local images, video and audio are all
 // inlined, so it opens offline, by email, from a USB stick, or as a hosted page.
+// JPEG and PNG images become WebP when that makes them smaller (encoded by the Chrome or
+// Edge on this computer), an image shown more than once is stored once, and it warns when
+// the file is too big to email or to publish as one page.
 //
 //   node bundle.mjs <deck folder or deck.html> [--out file.html] [--all-fonts]
-//        [--keep-media] [--no-fonts]
+//        [--keep-media] [--no-fonts] [--quality 0.8] [--max-px 2560] [--no-webp]
 //
 // --keep-media   leave video/audio as files next to the bundle (copied to dist/assets/)
 // --all-fonts    keep every font subset (Cyrillic, Greek, Vietnamese...), not just Latin
+// --quality      WebP quality from 0 to 1 (default 0.8); lower is smaller and softer
+// --max-px       scale images down so the longest side is at most this (default 2560, 0 = never)
+// --no-webp      keep images exactly as they are (no WebP, no scaling)
+// --no-dedupe    write an image out again each time it's shown
 // Output: <deck folder>/dist/<title>.html (unless --out).
 
 import fs from "node:fs";
@@ -16,15 +23,25 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { args, deckFile, folderName, usage } from "./lib/engine.mjs";
 import { buildDeckIcons, cacheDir } from "./lib/icons.mjs";
+import { imageSize, shrinkImages } from "./lib/images.mjs";
 
 const opt = args(process.argv.slice(2));
 const file = deckFile(opt._[0]);
 if (!file || !fs.existsSync(file)) {
-  console.log(usage(fileURLToPath(import.meta.url), 12));
+  console.log(usage(fileURLToPath(import.meta.url), 17));
   process.exit(1);
 }
 const deckDir = path.dirname(file);
 const warnings = [];
+function numberOption(name, def, ok) {
+  if (opt[name] === undefined) return def;
+  const v = Number(opt[name]);
+  if (typeof opt[name] === "string" && ok(v)) return v;
+  warnings.push(`--${name} ${opt[name] === true ? "needs a value" : `${opt[name]} is out of range`}; used ${def}`);
+  return def;
+}
+const quality = numberOption("quality", 0.8, (q) => q > 0 && q <= 1);
+const maxPx = numberOption("max-px", 2560, (n) => Number.isInteger(n) && n >= 0);
 
 const MIME = {
   png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", gif: "image/gif", webp: "image/webp",
@@ -40,7 +57,25 @@ const dataUri = (buf, mime) => `data:${mime};base64,${buf.toString("base64")}`;
 // \x21 is "!" and is valid in strings and in every kind of regex.
 const escScript = (js) => js.replace(/<\/script/gi, "<\\/script").replace(/<!--/g, "<\\x21--");
 const isRemote = (u) => /^https?:\/\//i.test(u);
-const isInline = (u) => /^(data:|blob:|#|mailto:|tel:|javascript:)/i.test(u);
+const isInline = (u) => /^(data:|blob:|#|mailto:|tel:|javascript:|html-slides-media:)/i.test(u);
+
+// Images go in as a short placeholder, one per distinct image, and become data: URIs at the
+// end, after they've been made WebP and repeats have been pointed at one stored copy.
+const media = new Map(); // id -> { buf, mime, label }
+const MEDIA_TOKEN = /html-slides-media:([0-9a-f]{16})/g;
+// Bytes each inlined file adds to the bundle, for the size report.
+const weights = new Map();
+const weigh = (label, bytes) => weights.set(label, (weights.get(label) || 0) + bytes);
+function inlineData(buf, mime, label) {
+  if (mime.startsWith("image/")) {
+    const id = crypto.createHash("sha1").update(buf).digest("hex").slice(0, 16);
+    if (!media.has(id)) media.set(id, { buf, mime, label });
+    return `html-slides-media:${id}`;
+  }
+  const uri = dataUri(buf, mime);
+  weigh(mime.startsWith("font/") ? "fonts" : label, uri.length);
+  return uri;
+}
 
 // ---------- network, cached ----------
 const netDir = path.join(cacheDir(), "cdn");
@@ -79,7 +114,7 @@ function inlineLocal(ref, baseDir, { media = true } = {}) {
     return target.split(path.sep).join("/");
   }
   const mime = MIME[extOf(p)] || "application/octet-stream";
-  return dataUri(fs.readFileSync(p), mime);
+  return inlineData(fs.readFileSync(p), mime, path.relative(deckDir, p).split(path.sep).join("/"));
 }
 
 // url(...) inside CSS, relative to the CSS file (local path or remote URL)
@@ -97,7 +132,7 @@ async function inlineCssUrls(css, base) {
     try {
       if (isRemote(base) || isRemote(ref)) {
         const abs = new URL(ref, isRemote(base) ? base : undefined).href;
-        map.set(ref, dataUri(await fetchCached(abs), MIME[extOf(abs)] || "application/octet-stream"));
+        map.set(ref, inlineData(await fetchCached(abs), MIME[extOf(abs)] || "application/octet-stream", abs.split(/[?#]/)[0]));
       } else {
         map.set(ref, inlineLocal(ref, base));
       }
@@ -184,6 +219,7 @@ for (const m of [...html.matchAll(scriptRe)]) {
     warnings.push(`kept link to ${src} (${e.message})`);
     continue;
   }
+  weigh(src.replace(/^https?:\/\/[^/]+\/(npm\/)?/i, ""), js.length);
   const lib = attr(tag, "data-lib");
   const type = attr(tag, "type");
   const open = `<script${type ? ` type="${type}"` : ""}${lib ? ` data-lib="${lib}"` : ""}${/\sdefer[\s>]/.test(tag) && !type ? ' type="module"' : ""}>`;
@@ -253,6 +289,84 @@ html = html.replace(/(<script[^>]*id=["']deck-data["'][^>]*>)([\s\S]*?)(<\/scrip
   };
   return `${open}\n${JSON.stringify(walk(data), null, 2).replace(/</g, "\\u003c")}\n${close}`;
 });
+
+// ---------- images: WebP, and one stored copy of each repeated image ----------
+const ids = [...new Set([...html.matchAll(MEDIA_TOKEN)].map((m) => m[1]))];
+// For the size warning: how many images --max-px 1920 would scale down.
+const over1920 = ids.filter((id) => {
+  const size = imageSize(media.get(id).buf);
+  return size && Math.max(size.w, size.h) > 1920;
+}).length;
+const shrunk = { count: 0, before: 0, after: 0 };
+if (ids.length && !opt["no-webp"]) {
+  const { results, error } = await shrinkImages(
+    ids.map((id) => media.get(id)),
+    { quality, maxPx, onEncode: (n) => console.log(`Making ${n} image(s) WebP (cached for next time)...`) },
+  );
+  if (error) warnings.push(`some images were kept as they are: ${error}`);
+  ids.forEach((id, i) => {
+    if (!results[i]) return;
+    const m = media.get(id);
+    shrunk.count++;
+    shrunk.before += m.buf.length;
+    shrunk.after += results[i].buf.length;
+    Object.assign(m, results[i]);
+  });
+}
+const uris = new Map(ids.map((id) => [id, dataUri(media.get(id).buf, media.get(id).mime)]));
+
+// An <img> whose image is shown more than once gets data-media-src="mN" instead of its own
+// copy, and MEDIA_LOADER sets its src from #deck-media before the engine runs, so the
+// engine, overview and presenter view only ever see ordinary <img src>.
+const MEDIA_LOADER = `// bundle.mjs stored each image shown more than once a single time, in #deck-media.
+(function () {
+  var media = JSON.parse(document.getElementById("deck-media").textContent);
+  function put(root) {
+    var imgs = root.querySelectorAll("[data-media-src]");
+    for (var i = 0; i < imgs.length; i++) {
+      imgs[i].setAttribute("src", media[imgs[i].getAttribute("data-media-src")]);
+      imgs[i].removeAttribute("data-media-src");
+    }
+    var templates = root.querySelectorAll("template");
+    for (var j = 0; j < templates.length; j++) put(templates[j].content);
+  }
+  put(document);
+})();`;
+const IMG_SRC = /(<img\b[^>]*?\s)(?:data-)?src\s*=\s*(["'])html-slides-media:([0-9a-f]{16})\2/gi;
+const imgUses = new Map(); // id -> how many <img> show it
+const stored = new Map(); // id -> its key in #deck-media
+if (!opt["no-dedupe"]) {
+  for (const m of html.matchAll(IMG_SRC)) imgUses.set(m[3], (imgUses.get(m[3]) || 0) + 1);
+  html = html.replace(IMG_SRC, (m, pre, q, id) => {
+    if (imgUses.get(id) < 2) return m;
+    if (!stored.has(id)) stored.set(id, "m" + stored.size);
+    return `${pre}data-media-src="${stored.get(id)}"`;
+  });
+}
+const dedupe = { images: stored.size, uses: 0, saved: 0 };
+if (stored.size) {
+  const store = Object.fromEntries([...stored].map(([id, key]) => [key, uris.get(id)]));
+  const block =
+    `<script type="application/json" id="deck-media">${JSON.stringify(store)}</script>\n` +
+    `<script>\n${MEDIA_LOADER}\n</script>\n`;
+  // Before the first script after the deck (the engine), else at the end of <body>.
+  const end = html.lastIndexOf("</main>");
+  const at = end < 0 ? -1 : html.indexOf("<!--html-slides-script-", end);
+  if (at >= 0) html = html.slice(0, at) + block + html.slice(at);
+  else if (/<\/body>/i.test(html)) html = html.replace(/<\/body>/i, () => block + "</body>");
+  else html += block;
+  for (const id of stored.keys()) {
+    const size = uris.get(id).length;
+    weigh(media.get(id).label, size);
+    dedupe.uses += imgUses.get(id);
+    dedupe.saved += (imgUses.get(id) - 1) * size;
+  }
+}
+html = html.replace(MEDIA_TOKEN, (m, id) => {
+  weigh(media.get(id).label, uris.get(id).length);
+  return uris.get(id);
+});
+
 html = html.replace(/<!--html-slides-script-(\d+)-->/g, (m, i) => asideScripts[Number(i)]);
 
 // Leftover remote references (will need the internet)
@@ -280,10 +394,43 @@ for (const [src, target] of copied) {
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.copyFileSync(src, dest);
 }
-const mb = (fs.statSync(out).size / 1048576).toFixed(1);
-console.log(`Wrote ${out} (${mb} MB, ${icons.count} icons)`);
+const MB = 1048576;
+const mbText = (b) => `${(b / MB).toFixed(1)} MB`;
+const bytes = fs.statSync(out).size;
+console.log(`Wrote ${out} (${mbText(bytes)}, ${icons.count} icons)`);
 if (copied.length) console.log(`Copied ${copied.length} media file(s) next to it in ${path.join(path.dirname(out), "assets")}`);
-if (Number(mb) > 15) console.log("  It is big: hosts that publish one page often cap it at 16 MB (claude.ai Artifacts do). Try --keep-media, or shrink images and video.");
+// Sizes below are as they sit in the file: base64 makes each one about a third bigger.
+if (shrunk.count)
+  console.log(`  ${shrunk.count} image(s) made WebP: ${mbText((shrunk.before * 4) / 3)} -> ${mbText((shrunk.after * 4) / 3)}`);
+if (dedupe.images)
+  console.log(`  ${dedupe.images} image(s) shown ${dedupe.uses} times are stored once (saves ${mbText(dedupe.saved)})`);
+
+// Where a big file stops working. Email base64-encodes an attachment again, which adds
+// about a third, so the file itself has to be about a quarter under the limit.
+const LIMITS = [
+  { mb: 16, factor: 1, text: "hosts that cap one page at 16 MB (claude.ai Artifacts do)" },
+  { mb: 20, factor: 4 / 3, text: "an Outlook.com attachment: about 15 MB fits its 20 MB limit once email encodes it" },
+  { mb: 25, factor: 4 / 3, text: "a Gmail attachment, probably: about 18.7 MB fits its 25 MB limit (Gmail sends a Drive link instead)" },
+];
+const over = LIMITS.filter((l) => bytes * l.factor > l.mb * MB);
+if (over.length) {
+  console.log(`  Size warning: at ${mbText(bytes)} it's too big for`);
+  for (const l of over) console.log(`    - ${l.text}`);
+  const heaviest = [...weights].sort((a, b) => b[1] - a[1]).filter(([, b]) => b >= 0.1 * MB).slice(0, 5);
+  if (heaviest.length) {
+    console.log("  Heaviest parts:");
+    for (const [label, b] of heaviest) console.log(`    ${mbText(b).padStart(8)}  ${label}`);
+  }
+  const tips = [];
+  if ([...weights.keys()].some(isMedia)) tips.push("--keep-media puts video and audio next to the file");
+  if (opt["no-webp"] && ids.length) tips.push("leave out --no-webp");
+  if (shrunk.count) tips.push(`a lower --quality (now ${quality})`);
+  if (!opt["no-webp"] && over1920 && (maxPx === 0 || maxPx > 1920)) tips.push(`--max-px 1920 (${over1920} image(s) are bigger)`);
+  if (heaviest.some(([label]) => /\.js$/i.test(label) && !/^engine\//.test(label)))
+    tips.push("remove libraries the deck doesn't use (add-lib.mjs --remove)");
+  tips.push("crop screenshots to the part that matters, or share a link instead of the file");
+  console.log(`  To make it smaller: ${tips.join("; ")}.`);
+}
 for (const w of [...new Set(warnings)]) console.log("  " + w);
 
 async function replaceAsync(str, re, fn) {

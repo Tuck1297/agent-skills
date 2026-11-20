@@ -58,19 +58,19 @@ node scripts/new-deck.mjs --title "Q3 business review" --theme corporate --motio
    - references/interactive.md: device frames, mockups, screenshots with hotspots, state, tours.
    - references/libraries.md: Chart.js, Mermaid, maps and the other vetted libraries (`add-lib.mjs`).
 3. **Check**: `node scripts/check.mjs <deck>` screenshots every slide in its final state into `<deck>/.check/` and audits overflow, cut-off and tiny text, crowding, broken images, missing `{{values}}`, unknown icons and script errors. Fix what it reports, then **look at the PNGs**<!-- agent: gemini --> with `read_file`<!-- /agent --><!-- agent: codex --> with `view_image`<!-- /agent --> (`sheet.png` first): the audit can't judge design. Repeat until it's clean. `--transitions` freezes each transition for a look.
-4. **Bundle**: `node scripts/bundle.mjs <deck>` writes `dist/<title>.html`, named like the deck folder.
+4. **Bundle**: `node scripts/bundle.mjs <deck>` writes `dist/<title>.html`, named like the deck folder. It turns JPEG and PNG images into WebP when that makes them smaller (scaling any over 2560 px down), stores an image shown on several slides once, and prints a size warning when the file is too big to email (about 15 MB fits Outlook.com once email encodes it) or to publish as one page (16 MB). Tell the user about a size warning and its heaviest parts.
 5. **PowerPoint**: `node scripts/export-pptx.mjs <deck>` writes `dist/<title>.pptx`. On Windows with PowerPoint add `--preview` and read the `.check/pptx/compare-N.png` sheets (browser left, PowerPoint right). It opens only its own file and leaves PowerPoint running if it already was; a .pptx that's open in PowerPoint can't be overwritten, so ask the user to close it.
 6. **Report**: the folder, both files, how to present (section 8), and anything you couldn't verify.
 
-| Script            | Does                                                                                                        |
-| ----------------- | ----------------------------------------------------------------------------------------------------------- |
-| `new-deck.mjs`    | Makes a deck folder from `assets/template.html`                                                             |
-| `check.mjs`       | Screenshots + audit (`--slides 3,5-7`, `--pdf`, `--theme`, `--transitions`, `--hotspots`)                   |
-| `bundle.mjs`      | One self-contained HTML file (`--out`, `--keep-media`, `--no-fonts`)                                        |
-| `export-pptx.mjs` | PowerPoint (`--fonts embed\|keep\|office`, `--flatten`, `--scale 1.5`, `--no-builds`, `--preview`, `--out`) |
-| `icons.mjs`       | `--search chart line` finds react-icons names; check and bundle collect the deck's icons                    |
-| `add-lib.mjs`     | Adds a vetted library (`--list` shows the catalog)                                                          |
-| `reference.mjs`   | Reads source materials: decks, documents, screenshots, screen recordings, web pages (section 9)             |
+| Script            | Does                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `new-deck.mjs`    | Makes a deck folder from `assets/template.html`                                                                     |
+| `check.mjs`       | Screenshots + audit (`--slides 3,5-7`, `--pdf`, `--theme`, `--transitions`, `--hotspots`)                           |
+| `bundle.mjs`      | One self-contained HTML file (`--out`, `--keep-media`, `--no-fonts`, `--quality 0.8`, `--max-px 2560`, `--no-webp`) |
+| `export-pptx.mjs` | PowerPoint (`--fonts embed\|keep\|office`, `--flatten`, `--scale 1.5`, `--no-builds`, `--preview`, `--out`)         |
+| `icons.mjs`       | `--search chart line` finds react-icons names; check and bundle collect the deck's icons                            |
+| `add-lib.mjs`     | Adds a vetted library (`--list` shows the catalog)                                                                  |
+| `reference.mjs`   | Reads source materials: decks, documents, screenshots, screen recordings, web pages (section 9)                     |
 
 ## 4. Writing slides that work
 

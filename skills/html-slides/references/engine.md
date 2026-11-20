@@ -748,6 +748,7 @@ The engine fills each `[data-icon]` element's content with the SVG at load, afte
 - A video can be a full-bleed background: `<video class="bg" data-autoplay muted loop playsinline src="…">` in a `layout-media` slide.
 - Overview and presenter thumbnails show videos muted and still.
 - bundle.mjs inlines local video and audio unless you pass `--keep-media`.
+- Images are inlined too, as WebP when that makes them smaller, and an `<img>` image shown on several slides is stored once in the bundle (`#deck-media`, set by a small script before the engine runs). Video isn't re-encoded, so a long video can make a bundle too big to email: use `--keep-media` or link to it.
 
 ---
 
